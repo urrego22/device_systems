@@ -1,60 +1,86 @@
-from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi import APIRouter, status, Depends, Query, Response
 from typing import Optional, List
-from app.schemas.user_schema import UserCreate, UserResponse
+from app.schemas.user_schema import UserCreate, UserUpdate, UserPartialUpdate, UserResponse
+from app.services import user_service
+from app.dependencies.user_dependencies import get_user_or_404, get_api_config
 
-router = APIRouter()
-
-# Base de datos simulada en memoria
-fake_db: List[dict] = [
-    {"id": 1, "name": "Ana Torres", "email": "ana@mail.com",
-     "role": "admin", "is_active": True},
-    {"id": 2, "name": "Carlos López", "email": "carlos@mail.com",
-     "role": "support", "is_active": True},
-    {"id": 3, "name": "María Pérez", "email": "maria@mail.com",
-     "role": "user", "is_active": False},
-]
+router = APIRouter(
+    prefix="/users",
+    tags=["Users"]
+)
 
 
-@router.get("/users", response_model=List[UserResponse])
+@router.get(
+    "/",
+    response_model=List[UserResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Listar todos los usuarios",
+    description="Retorna todos los usuarios. Filtra opcionalmente por rol o estado activo/inactivo.",
+    response_description="Lista de usuarios del sistema"
+)
 def get_users(
-    response: Response,
-    role: Optional[str] = Query(None),
-    is_active: Optional[bool] = Query(None)
+    role: Optional[str] = Query(None, description="Filtrar por rol: admin, support o user"),
+    is_active: Optional[bool] = Query(None, description="Filtrar por estado: true o false"),
+    config: dict = Depends(get_api_config)
 ):
-    response.headers["X-App-Name"] = "device_systems"
-    response.headers["X-API-Version"] = "1.0"
-    result = fake_db
-    if role:
-        result = [u for u in result if u["role"] == role]
-    if is_active is not None:
-        result = [u for u in result if u["is_active"] == is_active]
-    return result
+    return user_service.get_all_users(role=role, is_active=is_active)
 
 
-@router.get("/users/{user_id}", response_model=UserResponse)
-def get_user(user_id: int, response: Response):
-    response.headers["X-App-Name"] = "device_systems"
-    response.headers["X-API-Version"] = "1.0"
-    user = next((u for u in fake_db if u["id"] == user_id), None)
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+@router.get(
+    "/{user_id}",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Consultar usuario por ID",
+    description="Busca y retorna un usuario por su ID. Si no existe, responde 404.",
+    response_description="Datos del usuario encontrado"
+)
+def get_user(user: dict = Depends(get_user_or_404)):
     return user
 
 
-@router.post("/users", response_model=UserResponse, status_code=201)
-def create_user(user: UserCreate, response: Response):
-    response.headers["X-App-Name"] = "device_systems"
-    response.headers["X-API-Version"] = "1.0"
-    if any(u["email"] == user.email for u in fake_db):
-        raise HTTPException(status_code=400,
-                            detail="El correo ya está registrado")
-    new_id = max(u["id"] for u in fake_db) + 1 if fake_db else 1
-    new_user = {
-        "id": new_id,
-        "name": user.name,
-        "email": user.email,
-        "role": user.role,
-        "is_active": user.is_active
-    }
-    fake_db.append(new_user)
-    return new_user
+@router.post(
+    "/",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Crear nuevo usuario",
+    description="Crea un usuario nuevo. Valida que el correo no esté duplicado y que el rol sea válido.",
+    response_description="Usuario creado exitosamente"
+)
+def create_user(user_data: UserCreate):
+    return user_service.create_user(user_data)
+
+
+@router.put(
+    "/{user_id}",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Actualizar usuario completamente (PUT)",
+    description="Reemplaza TODOS los campos del usuario. Se deben enviar todos los campos obligatoriamente.",
+    response_description="Usuario actualizado completamente"
+)
+def update_user_full(user_id: int, user_data: UserUpdate):
+    return user_service.update_user_full(user_id, user_data)
+
+
+@router.patch(
+    "/{user_id}",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Actualizar usuario parcialmente (PATCH)",
+    description="Modifica solo los campos enviados. Si envías un body vacío, responde 400.",
+    response_description="Usuario actualizado parcialmente"
+)
+def update_user_partial(user_id: int, user_data: UserPartialUpdate):
+    return user_service.update_user_partial(user_id, user_data)
+
+
+@router.delete(
+    "/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Eliminar usuario",
+    description="Elimina un usuario por su ID. Si no existe, responde 404.",
+    response_description="Usuario eliminado (sin contenido en la respuesta)"
+)
+def delete_user(user_id: int, user: dict = Depends(get_user_or_404)):
+    user_service.delete_user(user_id)
+    return None

@@ -1,8 +1,9 @@
-from fastapi import APIRouter, status, Depends, Query, Response
+from fastapi import APIRouter, status, Depends, Query
 from typing import Optional, List
-from app.schemas.user_schema import UserCreate, UserUpdate, UserPartialUpdate, UserResponse
+from sqlalchemy.orm import Session
+from app.schemas.user_schema import UserCreate, UserUpdate, UserPatch, UserResponse
 from app.services import user_service
-from app.dependencies.user_dependencies import get_user_or_404, get_api_config
+from app.dependencies.database_dependency import get_db
 
 router = APIRouter(
     prefix="/users",
@@ -14,16 +15,17 @@ router = APIRouter(
     "/",
     response_model=List[UserResponse],
     status_code=status.HTTP_200_OK,
-    summary="Listar todos los usuarios",
-    description="Retorna todos los usuarios. Filtra opcionalmente por rol o estado activo/inactivo.",
-    response_description="Lista de usuarios del sistema"
+    summary="Listar usuarios",
+    description="Retorna todos los usuarios. Filtra por rol, estado o cambia el orden.",
+    response_description="Lista de usuarios registrados en base de datos"
 )
 def get_users(
     role: Optional[str] = Query(None, description="Filtrar por rol: admin, support o user"),
     is_active: Optional[bool] = Query(None, description="Filtrar por estado: true o false"),
-    config: dict = Depends(get_api_config)
+    order_by: Optional[str] = Query("id", description="Ordenar por: id, name o created_at"),
+    db: Session = Depends(get_db)
 ):
-    return user_service.get_all_users(role=role, is_active=is_active)
+    return user_service.get_all_users(db, role=role, is_active=is_active, order_by=order_by)
 
 
 @router.get(
@@ -31,23 +33,23 @@ def get_users(
     response_model=UserResponse,
     status_code=status.HTTP_200_OK,
     summary="Consultar usuario por ID",
-    description="Busca y retorna un usuario por su ID. Si no existe, responde 404.",
+    description="Busca un usuario en la base de datos por su ID. Retorna 404 si no existe.",
     response_description="Datos del usuario encontrado"
 )
-def get_user(user: dict = Depends(get_user_or_404)):
-    return user
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    return user_service.get_user_by_id(db, user_id)
 
 
 @router.post(
     "/",
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Crear nuevo usuario",
-    description="Crea un usuario nuevo. Valida que el correo no esté duplicado y que el rol sea válido.",
+    summary="Crear usuario",
+    description="Crea un nuevo usuario en la base de datos. Valida correo único y rol permitido.",
     response_description="Usuario creado exitosamente"
 )
-def create_user(user_data: UserCreate):
-    return user_service.create_user(user_data)
+def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
+    return user_service.create_user(db, user_data)
 
 
 @router.put(
@@ -55,11 +57,11 @@ def create_user(user_data: UserCreate):
     response_model=UserResponse,
     status_code=status.HTTP_200_OK,
     summary="Actualizar usuario completamente (PUT)",
-    description="Reemplaza TODOS los campos del usuario. Se deben enviar todos los campos obligatoriamente.",
+    description="Reemplaza todos los campos del usuario en la base de datos.",
     response_description="Usuario actualizado completamente"
 )
-def update_user_full(user_id: int, user_data: UserUpdate):
-    return user_service.update_user_full(user_id, user_data)
+def update_user_full(user_id: int, user_data: UserUpdate, db: Session = Depends(get_db)):
+    return user_service.update_user_full(db, user_id, user_data)
 
 
 @router.patch(
@@ -67,20 +69,20 @@ def update_user_full(user_id: int, user_data: UserUpdate):
     response_model=UserResponse,
     status_code=status.HTTP_200_OK,
     summary="Actualizar usuario parcialmente (PATCH)",
-    description="Modifica solo los campos enviados. Si envías un body vacío, responde 400.",
+    description="Modifica solo los campos enviados. Body vacío retorna 400.",
     response_description="Usuario actualizado parcialmente"
 )
-def update_user_partial(user_id: int, user_data: UserPartialUpdate):
-    return user_service.update_user_partial(user_id, user_data)
+def update_user_partial(user_id: int, user_data: UserPatch, db: Session = Depends(get_db)):
+    return user_service.update_user_partial(db, user_id, user_data)
 
 
 @router.delete(
     "/{user_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Eliminar usuario",
-    description="Elimina un usuario por su ID. Si no existe, responde 404.",
-    response_description="Usuario eliminado (sin contenido en la respuesta)"
+    description="Elimina un usuario de la base de datos. Retorna 404 si no existe.",
+    response_description="Usuario eliminado"
 )
-def delete_user(user_id: int, user: dict = Depends(get_user_or_404)):
-    user_service.delete_user(user_id)
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    user_service.delete_user(db, user_id)
     return None

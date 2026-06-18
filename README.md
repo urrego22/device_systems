@@ -433,7 +433,171 @@ En la v3.0.0 se agrega `get_db()` en `app/dependencies/database_dependency.py` p
 
 **v3.0.0 — Persistencia real:** Incorporar SQLAlchemy fue el cambio más importante. Los datos ahora persisten aunque el servidor se reinicie, se pueden aplicar constraints reales como `unique=True`, y las consultas son mucho más poderosas con filtros y ordenamiento directo en SQL. La separación entre modelo SQLAlchemy y schema Pydantic al principio puede parecer redundante, pero tiene mucho sentido: el modelo define cómo se guarda la información y el schema define cómo se valida y comunica con el cliente. Son responsabilidades diferentes y mantenerlas separadas hace el código más limpio y seguro.
 
+**Proyecto Final V1 — Relaciones y modelado de datos:** Esta versión representó un paso importante porque permitió pasar de una API enfocada únicamente en usuarios a un sistema compuesto por múltiples entidades relacionadas. La implementación de los modelos User, Device y Loan me ayudó a comprender cómo diseñar relaciones uno a muchos utilizando SQLAlchemy, así como la importancia de las claves foráneas para garantizar la integridad de los datos. Además, el uso de Alembic facilitó el control de cambios en la estructura de la base de datos mediante migraciones versionadas. También reforcé conceptos de arquitectura por capas al mantener separados modelos, schemas, servicios y rutas, logrando una aplicación más organizada y escalable. Finalmente, la integración de Swagger permitió validar y documentar fácilmente todas las operaciones CRUD de usuarios, dispositivos y préstamos, obteniendo una API más completa y cercana a un entorno real de desarrollo.
+
+
 ---
+
+---
+
+## 🔹 Proyecto Final V1 — Gestión de Usuarios, Dispositivos y Préstamos
+
+### Descripción
+
+En esta versión se amplía la API incorporando nuevas entidades relacionadas mediante SQLAlchemy:
+
+* Users
+* Devices
+* Loans
+
+Además se implementan:
+
+* Relaciones 1:N
+* Foreign Keys
+* Alembic para control de versiones de base de datos
+* Migraciones automáticas
+* CRUD para usuarios, dispositivos y préstamos
+* Documentación Swagger/OpenAPI
+
+---
+
+### Captura 37 — Swagger Users
+
+> Verificación del módulo Users disponible en Swagger para la gestión de usuarios.
+
+![Swagger Users](capturas/v1_02_swagger_users.png)
+
+---
+
+### Captura 38 — Modelos y relaciones
+
+> Implementación de los modelos User, Device y Loan utilizando SQLAlchemy y relaciones mediante relationship() y ForeignKey().
+
+![Modelos y Relaciones](capturas/v1_04_modelos_relaciones.png)
+
+---
+
+### Captura 39 — Migración generada con Alembic
+
+> Alembic detecta automáticamente las nuevas tablas devices y loans y genera el archivo de migración correspondiente.
+
+![Alembic Revision](capturas/v1_05_alembic_revision.png)
+
+---
+
+### Captura 40 — Aplicación de migraciones
+
+> Ejecución de la migración utilizando el comando alembic upgrade head.
+
+![Alembic Upgrade](capturas/v1_06_alembic_upgrade.png)
+
+---
+
+### Captura 41 — Versión actual de la base de datos
+
+> Verificación de la revisión activa mediante alembic current.
+
+![Alembic Current](capturas/v1_07_alembic_current.png)
+
+---
+
+### Captura 42 — Schemas Device y Loan
+
+> Definición de los schemas Pydantic para validación de dispositivos y préstamos.
+
+![Schemas](capturas/v1_08_schemas_device_loan.png)
+
+---
+
+### Captura 43 — Services Device y Loan
+
+> Implementación de la lógica de negocio para dispositivos y préstamos.
+
+![Services](capturas/v1_09_services_device_loan.png)
+
+---
+
+### Captura 44 — Routes Device y Loan
+
+> Creación de endpoints para dispositivos y préstamos mediante APIRouter.
+
+![Routes](capturas/v1_10_routes_device_loan.png)
+
+---
+
+### Captura 45 — Swagger completo del Proyecto Final V1
+
+> Visualización de los módulos Users, Devices y Loans registrados correctamente en Swagger.
+
+![Swagger Completo](capturas/v1_11_swagger_users_devices_loans.png)
+
+---
+
+### Captura 46 — POST User
+
+> Creación exitosa de un usuario desde Swagger utilizando persistencia en SQLite.
+
+![POST User](capturas/v1_12_post_user.png)
+
+---
+
+### Captura 47 — POST Device
+
+> Registro exitoso de un dispositivo asociado a un usuario.
+
+![POST Device](capturas/v1_13_post_device.png)
+
+---
+
+### Captura 48 — POST Loan
+
+> Creación de un préstamo asociado a un usuario y un dispositivo.
+
+![POST Loan](capturas/v1_14_post_loan.png)
+
+---
+
+### Captura 49 — GET Users
+
+> Consulta de usuarios almacenados en la base de datos.
+
+![GET Users](capturas/v1_15_get_users.png)
+
+---
+
+### Captura 50 — GET Devices
+
+> Consulta de dispositivos registrados en la base de datos.
+
+![GET Devices](capturas/v1_16_get_devices.png)
+
+---
+
+### Captura 51 — GET Loans
+
+> Consulta de préstamos registrados en la base de datos.
+
+![GET Loans](capturas/v1_17_get_loans.png)
+
+---
+
+### Captura 52 — Estructura final del proyecto
+
+> Organización final del proyecto incluyendo modelos, rutas, schemas, servicios y migraciones.
+
+![Estructura Proyecto](capturas/v1_18_estructura_proyecto.png)
+
+---
+
+### Captura 53 — Rama de trabajo
+
+> Verificación de la rama utilizada para el desarrollo del Proyecto Final V1.
+
+![Rama Git](capturas/v1_19_rama_git.png)
+
+---
+
+
 
 ## 🎬 Videos de demostración
 
@@ -442,6 +606,9 @@ En la v3.0.0 se agrega `get_db()` en `app/dependencies/database_dependency.py` p
 [![FastAPI Intermedio: Evolución de device_systems con CRUD Completo](https://img.shields.io/badge/YouTube-FastAPI%20Intermedio%3A%20Evolución%20device__systems-red?style=for-the-badge&logo=youtube)](https://youtu.be/JibMRVahbqg)
 
 [![FastAPI con SQLAlchemy: Persistencia de Datos en device_systems](https://img.shields.io/badge/YouTube-FastAPI%20con%20SQLAlchemy%3A%20Persistencia%20de%20Datos-red?style=for-the-badge&logo=youtube)](https://youtu.be/e1cnjeBUlUU)
+
+
+[![Proyecto Final V1](https://img.shields.io/badge/YouTube-Proyecto%20Final%20V1-red?style=for-the-badge\&logo=youtube)](https://youtu.be/9sBVCicB_zc)
 
 ---
 

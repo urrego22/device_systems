@@ -951,7 +951,7 @@ Se implementaron las siguientes tecnologías:
 [![FastAPI con SQLAlchemy: Persistencia de Datos en device_systems](https://img.shields.io/badge/YouTube-FastAPI%20con%20SQLAlchemy%3A%20Persistencia%20de%20Datos-red?style=for-the-badge&logo=youtube)](https://youtu.be/e1cnjeBUlUU)
 
 
-[![Proyecto Final V1](https://img.shields.io/badge/YouTube-Proyecto%20Final%20V1-red?style=for-the-badge\&logo=youtube)](https://youtu.be/9sBVCicB_zc)
+[![Proyecto Final V1](https://img.shields.io/badge/YouTube-Proyecto%20Final%20V1-red?style=for-the-badge\&logo=youtube)](https://youtu.be/sT4856XfTWE)
 
 
 [![Proyecto Final V2](https://img.shields.io/badge/YouTube-Proyecto%20Final%20V2-red?style=for-the-badge&logo=youtube)](https://youtu.be/k8M5ufChmyE)

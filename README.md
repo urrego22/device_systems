@@ -720,7 +720,7 @@ Se implementaron las siguientes tecnologías:
 
 > Se genera correctamente un token JWT.
 
-![Login Exitoso](capturas/v2_31_login_exitoso_tokenjwt.png "Generación correcta del token JWT — Sara García")
+![Login Exitoso](capturas/v2_31_login_exitoso_token_jwt.png "Generación correcta del token JWT — Sara García")
 
 ---
 
@@ -736,7 +736,7 @@ Se implementaron las siguientes tecnologías:
 
 > Implementación de la dependencia encargada de validar el usuario autenticado.
 
-![Dependencia Auth](capturas/v2_35_dependencia_autenticacion_py.png "Dependencia de autenticación mediante JWT — Sara García")
+![Dependencia Auth](capturas/v2_33_dependencia_autenticacion_py.png "Dependencia de autenticación mediante JWT — Sara García")
 
 ---
 
@@ -744,7 +744,7 @@ Se implementaron las siguientes tecnologías:
 
 > Endpoint que retorna la información del usuario autenticado.
 
-![Endpoint Me](capturas/v2_34_endpoint_authme_py.png "Endpoint auth/me implementado — Sara García")
+![Endpoint Me](capturas/v2_34_endpoint_auth_me_py.png "Endpoint auth/me implementado — Sara García")
 
 ---
 
@@ -768,7 +768,7 @@ Se implementaron las siguientes tecnologías:
 
 > Uso del botón Authorize de Swagger.
 
-![OAuth2](capturas/v2_37_swagger_oauth2funcionando.png "OAuth2 funcionando correctamente en Swagger — Sara García")
+![OAuth2](capturas/v2_37_swagger_oauth2_funcionando.png "OAuth2 funcionando correctamente en Swagger — Sara García")
 
 ---
 
@@ -776,7 +776,7 @@ Se implementaron las siguientes tecnologías:
 
 > Consulta exitosa del usuario autenticado.
 
-![Token Válido](capturas/v2_38_auth_metoken_valido.png "Consulta exitosa usando token JWT — Sara García")
+![Token Válido](capturas/v2_38_auth_me_token_valido.png "Consulta exitosa usando token JWT — Sara García")
 
 ---
 

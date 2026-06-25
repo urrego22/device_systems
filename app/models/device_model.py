@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
+from datetime import datetime
 
 from app.database.connection import Base
 
@@ -17,9 +18,21 @@ class Device(Base):
         nullable=False
     )
 
+    device_type = Column(String, nullable=False)
+
+    brand = Column(String, nullable=True)
+
+    is_available = Column(Boolean, default=True)
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
+
     user_id = Column(
         Integer,
-        ForeignKey("users.id")
+        ForeignKey("users.id"),
+        nullable=True
     )
 
     owner = relationship(
@@ -28,6 +41,6 @@ class Device(Base):
     )
 
     loans = relationship(
-    "Loan",
-    back_populates="device"
-)
+        "Loan",
+        back_populates="device"
+    )

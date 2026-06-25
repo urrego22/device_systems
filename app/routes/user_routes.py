@@ -17,7 +17,7 @@ from app.schemas.user_schema import (
     UserResponse
 )
 
-from app.services import user_service
+from app.services import user_service, loan_service
 
 from app.dependencies.database_dependency import get_db
 
@@ -28,6 +28,8 @@ from app.dependencies.auth_dependency import (
 from app.models.user_model import User
 
 from app.rate_limiter import limiter
+
+from app.schemas.loan_schema import LoanResponse
 
 
 router = APIRouter(
@@ -102,6 +104,20 @@ def get_user(
         db,
         user_id
     )
+
+
+@router.get(
+    "/{user_id}/loans",
+    response_model=List[LoanResponse],
+    summary="Préstamos de un usuario",
+    description="Retorna todos los préstamos de un usuario usando join con Device."
+)
+def get_user_loans(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    return loan_service.get_loans_by_user(db, user_id)
 
 
 @router.post(

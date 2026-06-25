@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
+from datetime import datetime
 
 from app.database.connection import Base
 
@@ -12,6 +13,13 @@ class Loan(Base):
     loan_date = Column(Date, nullable=False)
 
     return_date = Column(Date, nullable=True)
+
+    status = Column(String, nullable=False, default="active")
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
 
     user_id = Column(
         Integer,

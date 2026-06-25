@@ -46,7 +46,7 @@ app = FastAPI(
     title="device_systems API",
 
     description="""
-# Proyecto Final V2 - FastAPI Seguridad
+# Proyecto Final V1 - FastAPI Seguridad
 
 API REST segura para la gestión de:
 

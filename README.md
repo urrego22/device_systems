@@ -462,11 +462,11 @@ En esta versión se amplía la API incorporando nuevas entidades relacionadas me
 
 Además se implementan:
 
-* Relaciones 1:N
-* Foreign Keys
+* Relaciones 1:N con ForeignKey y relationship()
 * Alembic para control de versiones de base de datos
 * Migraciones automáticas
 * CRUD para usuarios, dispositivos y préstamos
+* Consultas con joins y filtros avanzados
 * Documentación Swagger/OpenAPI
 
 ---
@@ -479,23 +479,31 @@ Además se implementan:
 
 ---
 
-### Captura 38 — Modelos y relaciones
+### Captura 38 — Modelo Device actualizado
 
-> Implementación de los modelos User, Device y Loan utilizando SQLAlchemy y relaciones mediante relationship() y ForeignKey().
+> El modelo Device incluye los campos device_type, brand e is_available requeridos por la guía.
 
-![Modelos y Relaciones](capturas/v1_04_modelos_relaciones.png)
+![Modelo Device](capturas/v1_04_modelos_relaciones.png)
 
 ---
 
-### Captura 39 — Migración generada con Alembic
+### Captura 39 — Modelo Loan actualizado
 
-> Alembic detecta automáticamente las nuevas tablas devices y loans y genera el archivo de migración correspondiente.
+> El modelo Loan incluye el campo status (active/returned/overdue) y las relaciones con User y Device.
+
+![Modelo Loan](capturas/v1_04b_modelo_loan.png)
+
+---
+
+### Captura 40 — Migración generada con Alembic
+
+> Alembic detecta automáticamente las nuevas tablas y campos y genera el archivo de migración correspondiente.
 
 ![Alembic Revision](capturas/v1_05_alembic_revision.png)
 
 ---
 
-### Captura 40 — Aplicación de migraciones
+### Captura 41 — Aplicación de migraciones
 
 > Ejecución de la migración utilizando el comando alembic upgrade head.
 
@@ -503,7 +511,7 @@ Además se implementan:
 
 ---
 
-### Captura 41 — Versión actual de la base de datos
+### Captura 42 — Versión actual de la base de datos
 
 > Verificación de la revisión activa mediante alembic current.
 
@@ -511,39 +519,71 @@ Además se implementan:
 
 ---
 
-### Captura 42 — Schemas Device y Loan
+### Captura 43 — Historial de migraciones
 
-> Definición de los schemas Pydantic para validación de dispositivos y préstamos.
+> Verificación del historial completo de migraciones con alembic history.
 
-![Schemas](capturas/v1_08_schemas_device_loan.png)
-
----
-
-### Captura 43 — Services Device y Loan
-
-> Implementación de la lógica de negocio para dispositivos y préstamos.
-
-![Services](capturas/v1_09_services_device_loan.png)
+![Alembic History](capturas/v1_28_alembic_history.png)
 
 ---
 
-### Captura 44 — Routes Device y Loan
+### Captura 44 — Schema Device
 
-> Creación de endpoints para dispositivos y préstamos mediante APIRouter.
+> Definición del schema Pydantic para validación de dispositivos con los nuevos campos.
 
-![Routes](capturas/v1_10_routes_device_loan.png)
+![Schema Device](capturas/v1_08_schemas_device_loan.png)
 
 ---
 
-### Captura 45 — Swagger completo del Proyecto Final V1
+### Captura 45 — Schema Loan
 
-> Visualización de los módulos Users, Devices y Loans registrados correctamente en Swagger.
+> Definición del schema Pydantic para validación de préstamos incluyendo LoanDetailResponse para los joins.
+
+![Schema Loan](capturas/v1_08b_schema_loan.png)
+
+---
+
+### Captura 46 — Service Loan con joins
+
+> Implementación de get_all_loans usando .join(User).join(Device) con filtros avanzados por status, user_email y device_type.
+
+![Service Loan](capturas/v1_09_services_device_loan.png)
+
+---
+
+### Captura 47 — Routes Loan con filtros
+
+> Endpoints de préstamos incluyendo GET /loans/details y los filtros opcionales por status, user_email y device_type.
+
+![Routes Loan](capturas/v1_10_routes_device_loan.png)
+
+---
+
+### Captura 48 — Routes Device con historial
+
+> Endpoint GET /devices/{device_id}/loans para consultar el historial de préstamos de un dispositivo.
+
+![Routes Device](capturas/v1_10b_routes_device_loans.png)
+
+---
+
+### Captura 49 — Swagger completo del Proyecto Final V1
+
+> Visualización de los módulos Users, Devices y Loans con todos los endpoints nuevos registrados en Swagger.
 
 ![Swagger Completo](capturas/v1_11_swagger_users_devices_loans.png)
 
 ---
 
-### Captura 46 — POST User
+### Captura 50 — Autorización en Swagger
+
+> Uso del formulario OAuth2 en Swagger para autenticarse y acceder a los endpoints protegidos.
+
+![Swagger Autorizado](capturas/v1_11c_swagger_autorizado.png)
+
+---
+
+### Captura 51 — POST User
 
 > Creación exitosa de un usuario desde Swagger utilizando persistencia en SQLite.
 
@@ -551,23 +591,71 @@ Además se implementan:
 
 ---
 
-### Captura 47 — POST Device
+### Captura 52 — POST Device
 
-> Registro exitoso de un dispositivo asociado a un usuario.
+> Registro exitoso de un dispositivo con los nuevos campos device_type y brand.
 
 ![POST Device](capturas/v1_13_post_device.png)
 
 ---
 
-### Captura 48 — POST Loan
+### Captura 53 — POST Loan
 
-> Creación de un préstamo asociado a un usuario y un dispositivo.
+> Creación de un préstamo asociado a un usuario y un dispositivo. El campo status se asigna automáticamente como active.
 
 ![POST Loan](capturas/v1_14_post_loan.png)
 
 ---
 
-### Captura 49 — GET Users
+### Captura 54 — GET /loans/details — Join completo
+
+> Consulta que usa JOIN entre Loan, User y Device para retornar información completa de cada préstamo.
+
+![GET Loans Details](capturas/v1_20_get_loans_details.png)
+
+---
+
+### Captura 55 — GET /loans?status=active — Filtro por estado
+
+> Filtro avanzado que usa .filter(Loan.status == status) para retornar solo préstamos activos.
+
+![GET Loans Filter Status](capturas/v1_21_get_loans_filter_status.png)
+
+---
+
+### Captura 56 — GET /loans?device_type=laptop — Filtro por tipo de dispositivo
+
+> Filtro que usa join con Device y .ilike() para buscar préstamos por tipo de dispositivo.
+
+![GET Loans Filter Device Type](capturas/v1_22_get_loans_filter_device_type.png)
+
+---
+
+### Captura 57 — GET /loans — Lista general
+
+> Consulta de todos los préstamos registrados en la base de datos.
+
+![GET Loans](capturas/v1_17_get_loans.png)
+
+---
+
+### Captura 58 — GET /users/{user_id}/loans — Préstamos por usuario
+
+> Endpoint que usa join con Device para retornar todos los préstamos de un usuario específico.
+
+![GET User Loans](capturas/v1_24_get_user_loans.png)
+
+---
+
+### Captura 59 — GET /devices/{device_id}/loans — Historial del dispositivo
+
+> Endpoint que usa join con User para retornar el historial completo de préstamos de un dispositivo.
+
+![GET Device Loans](capturas/v1_25_get_device_loans.png)
+
+---
+
+### Captura 60 — GET /users — Lista de usuarios
 
 > Consulta de usuarios almacenados en la base de datos.
 
@@ -575,23 +663,39 @@ Además se implementan:
 
 ---
 
-### Captura 50 — GET Devices
+### Captura 61 — GET /devices — Lista de dispositivos
 
-> Consulta de dispositivos registrados en la base de datos.
+> Consulta de dispositivos con los nuevos campos device_type, brand e is_available.
 
 ![GET Devices](capturas/v1_16_get_devices.png)
 
 ---
 
-### Captura 51 — GET Loans
+### Captura 62 — GET /devices?is_available=true — Filtro disponibilidad
 
-> Consulta de préstamos registrados en la base de datos.
+> Filtro que retorna solo los dispositivos disponibles para préstamo.
 
-![GET Loans](capturas/v1_17_get_loans.png)
+![GET Devices Available](capturas/v1_23_get_devices_available.png)
 
 ---
 
-### Captura 52 — Estructura final del proyecto
+### Captura 63 — PATCH /loans/{loan_id}/return — Devolución de dispositivo
+
+> Endpoint que marca el préstamo como returned y cambia is_available del dispositivo a True.
+
+![PATCH Loan Return](capturas/v1_26_patch_loan_return.png)
+
+---
+
+### Captura 64 — Dispositivo disponible después de devolución
+
+> Verificación de que el dispositivo volvió a is_available: true luego de ser devuelto.
+
+![Device Disponible](capturas/v1_27_device_disponible_despues_devolucion.png)
+
+---
+
+### Captura 65 — Estructura final del proyecto
 
 > Organización final del proyecto incluyendo modelos, rutas, schemas, servicios y migraciones.
 
@@ -599,12 +703,13 @@ Además se implementan:
 
 ---
 
-### Captura 53 — Rama de trabajo
+### Captura 66 — Rama de trabajo
 
 > Verificación de la rama utilizada para el desarrollo del Proyecto Final V1.
 
 ![Rama Git](capturas/v1_19_rama_git.png)
 
+---
 ---
 
 ## 🔹 Proyecto Final V2 — Seguridad, Autenticación y Protección de la API

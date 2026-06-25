@@ -435,6 +435,16 @@ En la v3.0.0 se agrega `get_db()` en `app/dependencies/database_dependency.py` p
 
 **Proyecto Final V1 — Relaciones y modelado de datos:** Esta versión representó un paso importante porque permitió pasar de una API enfocada únicamente en usuarios a un sistema compuesto por múltiples entidades relacionadas. La implementación de los modelos User, Device y Loan me ayudó a comprender cómo diseñar relaciones uno a muchos utilizando SQLAlchemy, así como la importancia de las claves foráneas para garantizar la integridad de los datos. Además, el uso de Alembic facilitó el control de cambios en la estructura de la base de datos mediante migraciones versionadas. También reforcé conceptos de arquitectura por capas al mantener separados modelos, schemas, servicios y rutas, logrando una aplicación más organizada y escalable. Finalmente, la integración de Swagger permitió validar y documentar fácilmente todas las operaciones CRUD de usuarios, dispositivos y préstamos, obteniendo una API más completa y cercana a un entorno real de desarrollo.
 
+**proyecto Final V2:** 
+Esta versión representó la etapa más cercana a un entorno real de desarrollo profesional, ya que la seguridad pasó a ser un componente fundamental de la aplicación. Implementar OAuth2 y JWT me permitió comprender cómo proteger una API mediante autenticación basada en tokens, evitando exponer información sensible a usuarios no autorizados.
+
+El uso de Passlib reforzó la importancia de nunca almacenar contraseñas en texto plano, mientras que las dependencias de autenticación facilitaron la reutilización de la lógica de validación en múltiples endpoints. También aprendí a controlar permisos mediante roles, diferenciando las acciones permitidas para administradores y usuarios estándar.
+
+La incorporación de Middleware permitió monitorear las solicitudes y agregar cabeceras personalizadas, mientras que CORS habilitó una comunicación segura con aplicaciones frontend externas. Finalmente, SlowAPI añadió una capa adicional de protección limitando la cantidad de solicitudes permitidas y reduciendo el riesgo de ataques automatizados.
+
+En conjunto, esta versión transformó una API funcional en una aplicación mucho más segura, organizada y preparada para escenarios de desarrollo reales.
+
+
 
 ---
 
@@ -597,6 +607,234 @@ Además se implementan:
 
 ---
 
+## 🔹 Proyecto Final V2 — Seguridad, Autenticación y Protección de la API
+
+### Descripción
+
+En esta versión se incorporan mecanismos de seguridad avanzados para proteger la API y controlar el acceso a los recursos del sistema.
+
+Se implementaron las siguientes tecnologías:
+
+* OAuth2 Password Flow.
+* JSON Web Tokens (JWT).
+* Hash de contraseñas con Passlib.
+* Dependencias de autenticación.
+* Middleware personalizado.
+* CORS.
+* Rate Limiting con SlowAPI.
+* Control de acceso por roles.
+* Endpoint `/auth/me`.
+* Protección de rutas privadas.
+
+---
+
+### Captura 54 — Rama device_systems_security
+
+> Verificación de la rama utilizada para desarrollar todas las funcionalidades de seguridad implementadas en el Proyecto Final V2.
+
+![Rama Seguridad](capturas/v2_20_rama_device_systems_security.png "Rama device_systems_security utilizada para desarrollar el Proyecto Final V2 — Sara García")
+
+---
+
+### Captura 55 — Estructura del proyecto de seguridad
+
+> Se agregan las carpetas auth, middlewares y el archivo rate_limiter.py para centralizar toda la lógica de seguridad.
+
+![Estructura Seguridad](capturas/v2_21_estructura_proyecto_seguridad.png "Nueva estructura del proyecto con autenticación y seguridad — Sara García")
+
+---
+
+### Captura 56 — Dependencias instaladas
+
+> Instalación de las librerías necesarias para implementar OAuth2, JWT, Passlib y SlowAPI.
+
+![Dependencias](capturas/v2_22_dependencias_seguridad_instaladas.png "Dependencias instaladas para el módulo de seguridad — Sara García")
+
+---
+
+### Captura 57 — Migración aplicada con Alembic
+
+> Aplicación de la migración para mantener sincronizada la base de datos.
+
+![Alembic](capturas/v2_23_migracion_alembic_aplicada.png "Migración aplicada correctamente con Alembic — Sara García")
+
+---
+
+### Captura 58 — Archivo auth_service.py
+
+> Implementación de la lógica de registro, autenticación y generación de tokens JWT.
+
+![Auth Service](capturas/v2_24_archivo_auth_service_py.png "Archivo auth_service.py encargado de la autenticación — Sara García")
+
+---
+
+### Captura 59 — Archivo security.py
+
+> Configuración del hash de contraseñas y manejo de tokens JWT.
+
+![Security](capturas/v2_25_archivo_security_py.png "Archivo security.py con JWT y Passlib — Sara García")
+
+---
+
+### Captura 60 — Schemas de autenticación
+
+> Definición de los modelos Pydantic para registro, login y token.
+
+![Schemas Auth](capturas/v2_26_archivo_auth_schema_py.png "Schemas Pydantic de autenticación — Sara García")
+
+---
+
+### Captura 61 — Swagger con módulo Auth
+
+> Visualización de los nuevos endpoints del sistema de autenticación.
+
+![Swagger Auth](capturas/v2_27_swagger_v2_con_auth.png "Swagger mostrando el módulo Auth — Sara García")
+
+---
+
+### Captura 62 — Registro exitoso
+
+> Creación satisfactoria de un nuevo usuario.
+
+![Registro](capturas/v2_28_registro_usuario_exitoso.png "Registro exitoso de un nuevo usuario — Sara García")
+
+---
+
+### Captura 63 — Contraseña débil
+
+> El sistema rechaza contraseñas inseguras mediante validaciones.
+
+![Contraseña Débil](capturas/v2_29_registro_contrasena_debil.png "Validación de contraseña débil — Sara García")
+
+---
+
+### Captura 64 — Correo duplicado
+
+> La API impide registrar dos usuarios con el mismo correo.
+
+![Correo Duplicado](capturas/v2_30_registro_email_duplicado.png "Validación de correo duplicado — Sara García")
+
+---
+
+### Captura 65 — Login exitoso
+
+> Se genera correctamente un token JWT.
+
+![Login Exitoso](capturas/v2_31_login_exitoso_tokenjwt.png "Generación correcta del token JWT — Sara García")
+
+---
+
+### Captura 66 — Contraseña incorrecta
+
+> Error de autenticación cuando las credenciales son inválidas.
+
+![Login Incorrecto](capturas/v2_32_login_contrasena_incorrecta.png "Error de autenticación por contraseña incorrecta — Sara García")
+
+---
+
+### Captura 67 — Dependencia de autenticación
+
+> Implementación de la dependencia encargada de validar el usuario autenticado.
+
+![Dependencia Auth](capturas/v2_35_dependencia_autenticacion_py.png "Dependencia de autenticación mediante JWT — Sara García")
+
+---
+
+### Captura 68 — Endpoint auth/me
+
+> Endpoint que retorna la información del usuario autenticado.
+
+![Endpoint Me](capturas/v2_34_endpoint_authme_py.png "Endpoint auth/me implementado — Sara García")
+
+---
+
+### Captura 69 — Endpoint auth/me en Swagger
+
+> Visualización del endpoint protegido en Swagger.
+
+![Auth Me](capturas/v2_35_endpoint_auth_me_disponible.png "Endpoint auth/me disponible en Swagger — Sara García")
+
+---
+
+### Captura 70 — Acceso sin token
+
+> Intento de acceso a una ruta protegida sin autenticación.
+
+![Sin Token](capturas/v2_36_acceso_sin_token.png "Error 401 por ausencia del token JWT — Sara García")
+
+---
+
+### Captura 71 — OAuth2 funcionando
+
+> Uso del botón Authorize de Swagger.
+
+![OAuth2](capturas/v2_37_swagger_oauth2funcionando.png "OAuth2 funcionando correctamente en Swagger — Sara García")
+
+---
+
+### Captura 72 — Token válido
+
+> Consulta exitosa del usuario autenticado.
+
+![Token Válido](capturas/v2_38_auth_metoken_valido.png "Consulta exitosa usando token JWT — Sara García")
+
+---
+
+### Captura 73 — Users autenticado
+
+> Acceso exitoso a rutas protegidas.
+
+![Users](capturas/v2_39_users_autenticado_exitoso.png "Consulta exitosa de usuarios autenticados — Sara García")
+
+---
+
+### Captura 74 — Usuario con rol user
+
+> Creación de un usuario estándar.
+
+![Usuario User](capturas/v2_40_usuario_user_creado.png "Creación de usuario con rol user — Sara García")
+
+---
+
+### Captura 75 — Error 403
+
+> Restricción de permisos para usuarios sin privilegios.
+
+![403 Forbidden](capturas/v2_41_acceso_denegado_403.png "Acceso denegado por permisos insuficientes — Sara García")
+
+---
+
+### Captura 76 — Creación de dispositivo como administrador
+
+> Solo un administrador puede crear dispositivos.
+
+![Device Admin](capturas/v2_42_creacion_dispositivo_admin.png "Creación de dispositivos por administrador — Sara García")
+
+---
+
+### Captura 77 — Configuración CORS
+
+> Configuración para permitir conexiones desde frontends autorizados.
+
+![CORS](capturas/v2_43_configuracion_cors.png "Configuración de CORS en FastAPI — Sara García")
+
+---
+
+### Captura 78 — Cabeceras Middleware
+
+> Middleware agregando cabeceras personalizadas a las respuestas.
+
+![Middleware](capturas/v2_44_cabeceras_middleware.png "Cabeceras X-App-Name, X-Process-Time y X-Request-ID — Sara García")
+
+---
+
+### Captura 79 — Rate Limiting
+
+> Protección de la API limitando la cantidad de solicitudes permitidas.
+
+![Rate Limiting](capturas/v2_45_rate_limiting_429.png "Protección Rate Limiting con error 429 — Sara García")
+
+
 
 
 ## 🎬 Videos de demostración
@@ -609,6 +847,9 @@ Además se implementan:
 
 
 [![Proyecto Final V1](https://img.shields.io/badge/YouTube-Proyecto%20Final%20V1-red?style=for-the-badge\&logo=youtube)](https://youtu.be/9sBVCicB_zc)
+
+
+[![Proyecto Final V2](https://img.shields.io/badge/YouTube-Proyecto%20Final%20V2-red?style=for-the-badge&logo=youtube)](https://youtu.be/k8M5ufChmyE)
 
 ---
 

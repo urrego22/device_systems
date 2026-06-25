@@ -21,6 +21,13 @@ class User(Base):
         index=True
     )
 
+    # NUEVO CAMPO PARA AUTENTICACIÓN
+    hashed_password = Column(
+        String,
+        nullable=False,
+        default=""
+    )
+
     role = Column(String, nullable=False)
 
     is_active = Column(
@@ -33,13 +40,12 @@ class User(Base):
         default=datetime.utcnow
     )
 
-    # Relación 1:N con Device
     devices = relationship(
         "Device",
         back_populates="owner"
     )
 
     loans = relationship(
-    "Loan",
-    back_populates="user"
-)
+        "Loan",
+        back_populates="user"
+    )

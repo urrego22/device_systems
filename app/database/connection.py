@@ -8,11 +8,27 @@ DATABASE_URL = "sqlite:///./device_systems.db"
 # Motor de conexión
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False}  # necesario para SQLite
+    connect_args={"check_same_thread": False}
 )
 
 # Fábrica de sesiones
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
 
 # Base declarativa para los modelos
 Base = declarative_base()
+
+
+# NUEVO ↓↓↓
+def get_db():
+
+    db = SessionLocal()
+
+    try:
+        yield db
+
+    finally:
+        db.close()

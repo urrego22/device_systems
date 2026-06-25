@@ -1,62 +1,154 @@
 from fastapi import FastAPI
-from app.database.connection import engine, Base
 
-from app.routes.user_routes import router as user_router
-from app.routes.device_routes import router as device_router
-from app.routes.loan_routes import router as loan_router
+from fastapi.middleware.cors import CORSMiddleware
 
-# Crear tablas automáticamente
-Base.metadata.create_all(bind=engine)
+from slowapi.errors import RateLimitExceeded
+
+from slowapi.middleware import SlowAPIMiddleware
+
+from slowapi import _rate_limit_exceeded_handler
+
+from app.rate_limiter import limiter
+
+from app.database.connection import (
+    engine,
+    Base
+)
+
+from app.routes.user_routes import (
+    router as user_router
+)
+
+from app.routes.device_routes import (
+    router as device_router
+)
+
+from app.routes.loan_routes import (
+    router as loan_router
+)
+
+from app.auth.auth_routes import (
+    router as auth_router
+)
+
+from app.middlewares.request_middleware import (
+    request_middleware
+)
+
+
+Base.metadata.create_all(
+    bind=engine
+)
+
 
 app = FastAPI(
-    title="Device Systems API",
+
+    title="device_systems API",
+
     description="""
-# Proyecto Final V1 - FastAPI Avanzado
+# Proyecto Final V2 - FastAPI Seguridad
 
-Sistema para la gestión de:
+API REST segura para la gestión de:
 
-- Users
-- Devices
-- Loans
+- Usuarios
+- Dispositivos
+- Préstamos
 
-Características implementadas:
+Tecnologías implementadas:
 
-- FastAPI
-- SQLAlchemy ORM
-- SQLite
+- SQLAlchemy
 - Alembic
-- Relaciones entre modelos
-- Foreign Keys
-- Joins
-- Filtros avanzados
-- Swagger / OpenAPI
+- OAuth2
+- JWT
+- Passlib
+- Middleware personalizado
+- CORS
+- Rate Limiting
+- Validaciones avanzadas con Pydantic v2
 
-Desarrollado para la evidencia EV10.
+Proyecto académico SENA.
 """,
-    version="1.0.0",
+
+    version="3.0.0",
+
     contact={
-        "name": "Luis Diego",
+
+        "name": "Sara García Urrego",
+
         "email": "estudiante@sena.edu.co"
     }
 )
 
-# Rutas
-app.include_router(user_router)
-app.include_router(device_router)
-app.include_router(loan_router)
 
+# RATE LIMITING
 
-@app.get(
-    "/",
-    tags=["Root"],
-    summary="Bienvenida"
+app.state.limiter = limiter
+
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler
 )
+
+app.add_middleware(
+    SlowAPIMiddleware
+)
+
+
+# MIDDLEWARE
+
+app.middleware("http")(
+    request_middleware
+)
+
+
+# CORS
+
+app.add_middleware(
+    CORSMiddleware,
+
+    allow_origins=[
+        "http://localhost:5173",
+
+        "http://localhost:3000"
+    ],
+
+    allow_credentials=True,
+
+    allow_methods=["*"],
+
+    allow_headers=["*"]
+)
+
+
+# RUTAS
+
+app.include_router(
+    user_router
+)
+
+app.include_router(
+    device_router
+)
+
+app.include_router(
+    loan_router
+)
+
+app.include_router(
+    auth_router
+)
+
+
+@app.get("/")
 def root():
+
     return {
-        "message": "Bienvenido al Proyecto Final V1",
-        "project": "Device Systems",
-        "version": "1.0.0",
-        "database": "SQLite",
-        "docs": "/docs",
-        "redoc": "/redoc"
+
+        "message": "Bienvenido al Proyecto Final V2",
+
+        "project": "device_systems",
+
+        "version": "3.0.0",
+
+        "database": "SQLite"
     }

@@ -1,92 +1,38 @@
-from pydantic import (
-    BaseModel,
-    EmailStr,
-    Field,
-    field_validator,
-    ConfigDict
-)
-
-import re
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 class UserRegister(BaseModel):
-
-    name: str = Field(
-        min_length=3,
-        max_length=100
-    )
-
-    email: EmailStr
-
-    password: str
-
-    role: str = Field(
-        default="user"
-    )
+    name: str = Field(..., min_length=2)
+    email: str = Field(..., description="Email válido")
+    password: str = Field(..., min_length=8)
+    role: str = Field(default="user")
 
     @field_validator("password")
     @classmethod
-    def validate_password(cls, value):
-
-        if len(value) < 8:
-            raise ValueError(
-                "Password must contain at least 8 characters"
-            )
-
-        if " " in value:
-            raise ValueError(
-                "Password cannot contain spaces"
-            )
-
-        if not re.search(r"[A-Z]", value):
-            raise ValueError(
-                "Password must contain one uppercase letter"
-            )
-
-        if not re.search(r"[a-z]", value):
-            raise ValueError(
-                "Password must contain one lowercase letter"
-            )
-
-        if not re.search(r"\d", value):
-            raise ValueError(
-                "Password must contain one number"
-            )
-
-        return value
+    def validate_password(cls, v):
+        if " " in v:
+            raise ValueError("La contraseña no puede tener espacios")
+        if not any(c.isupper() for c in v):
+            raise ValueError("Debe tener al menos una mayúscula")
+        if not any(c.islower() for c in v):
+            raise ValueError("Debe tener al menos una minúscula")
+        if not any(c.isdigit() for c in v):
+            raise ValueError("Debe tener al menos un número")
+        return v
 
 
 class UserLogin(BaseModel):
-
-    email: EmailStr
-
+    email: str
     password: str
 
 
 class Token(BaseModel):
-
     access_token: str
-
     token_type: str
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TokenData(BaseModel):
-
     email: str | None = None
-
-
-class UserResponse(BaseModel):
-
-    id: int
-
-    name: str
-
-    email: str
-
-    role: str
-
-    is_active: bool
-
-    model_config = ConfigDict(
-        from_attributes=True
-    )
+    role: str | None = None

@@ -1,12 +1,8 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.user_model import User
-
-from app.schemas.auth_schema import (
-    UserRegister,
-    UserLogin
-)
-
+from app.schemas.auth_schema import UserRegister
 from app.auth.security import (
     get_password_hash,
     verify_password,
@@ -14,66 +10,68 @@ from app.auth.security import (
 )
 
 
-def register_user(
-    db: Session,
-    user_data: UserRegister
-):
+def register_user(db: Session, data: UserRegister):
 
-    existing_user = db.query(User).filter(
-        User.email == user_data.email
+    existing = db.query(User).filter(
+        User.email == data.email
     ).first()
 
-    if existing_user:
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="El email ya está registrado"
+        )
 
-        return None
+    allowed_roles = ["admin", "support", "user"]
+    if data.role not in allowed_roles:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Rol no permitido. Usa: {allowed_roles}"
+        )
 
-    new_user = User(
-        name=user_data.name,
-        email=user_data.email,
-        hashed_password=get_password_hash(
-            user_data.password
-        ),
-        role=user_data.role,
+    hashed = get_password_hash(data.password)
+
+    user = User(
+        name=data.name,
+        email=data.email,
+        hashed_password=hashed,
+        role=data.role,
         is_active=True
     )
 
-    db.add(new_user)
-
+    db.add(user)
     db.commit()
+    db.refresh(user)
 
-    db.refresh(new_user)
-
-    return new_user
+    return user
 
 
-def login_user(
-    db: Session,
-    login_data: UserLogin
-):
+def login_user(db: Session, email: str, password: str):
 
     user = db.query(User).filter(
-        User.email == login_data.email
+        User.email == email
     ).first()
 
     if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Credenciales incorrectas"
+        )
 
-        return None
+    if not verify_password(password, user.hashed_password):
+        raise HTTPException(
+            status_code=401,
+            detail="Credenciales incorrectas"
+        )
 
-    if not verify_password(
-        login_data.password,
-        user.hashed_password
-    ):
-
-        return None
+    if not user.is_active:
+        raise HTTPException(
+            status_code=403,
+            detail="Usuario inactivo"
+        )
 
     token = create_access_token(
-        {
-            "sub": user.email,
-            "role": user.role
-        }
+        data={"sub": user.email, "role": user.role}
     )
 
-    return {
-        "access_token": token,
-        "token_type": "bearer"
-    }
+    return {"access_token": token, "token_type": "bearer"}
